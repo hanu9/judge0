@@ -356,5 +356,51 @@
     id: 89,
     name: "Multi-file program",
     is_archived: false,
+  },
+  {
+    id: 1001,
+    name: "Node.js (latest stable)",
+    is_archived: false,
+    source_file: "script.js",
+    run_cmd: "/usr/bin/node script.js"
+  },
+  {
+    id: 1002,
+    name: "Python (latest stable)",
+    is_archived: false,
+    source_file: "script.py",
+    run_cmd: "/usr/bin/python3 script.py"
+  },
+  {
+    id: 1003,
+    name: "TypeScript (latest stable)",
+    is_archived: false,
+    source_file: "script.ts",
+    compile_cmd: "/usr/bin/tsc %s script.ts",
+    run_cmd: "/usr/bin/node script.js"
+  },
+  {
+    id: 1004,
+    name: "Go (latest stable)",
+    is_archived: false,
+    source_file: "main.go",
+    compile_cmd: "/usr/local/bin/go build %s main.go",
+    run_cmd: "./main"
+  },
+  {
+    id: 1005,
+    name: "Rust (latest stable)",
+    is_archived: false,
+    source_file: "main.rs",
+    compile_cmd: "/usr/local/bin/rustc %s main.rs",
+    run_cmd: "./main"
+  },
+  {
+    id: 1006,
+    name: "Java (OpenJDK 17)",
+    is_archived: false,
+    source_file: "Main.java",
+    compile_cmd: "/usr/bin/javac %s Main.java",
+    run_cmd: "/usr/bin/java Main"
   }
 ]
