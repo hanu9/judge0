@@ -366,18 +366,18 @@
   },
   {
     id: 1002,
-    name: "Python (latest stable)",
-    is_archived: false,
-    source_file: "script.py",
-    run_cmd: "/usr/bin/python3 script.py"
-  },
-  {
-    id: 1003,
     name: "TypeScript (latest stable)",
     is_archived: false,
     source_file: "script.ts",
     compile_cmd: "/usr/bin/tsc %s script.ts",
     run_cmd: "/usr/bin/node script.js"
+  },
+  {
+    id: 1003,
+    name: "Python (latest stable)",
+    is_archived: false,
+    source_file: "script.py",
+    run_cmd: "/usr/local/bin/python3 script.py"
   },
   {
     id: 1004,
@@ -397,7 +397,15 @@
   },
   {
     id: 1006,
-    name: "Java (OpenJDK 17)",
+    name: "C++ (latest stable)",
+    is_archived: false,
+    source_file: "main.cpp",
+    compile_cmd: "/usr/bin/g++ %s main.cpp",
+    run_cmd: "./a.out"
+  },
+  {
+    id: 1007,
+    name: "Java (latest stable)",
     is_archived: false,
     source_file: "Main.java",
     compile_cmd: "/usr/bin/javac %s Main.java",

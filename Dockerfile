@@ -56,11 +56,11 @@ RUN curl -fsSL https://deb.nodesource.com/setup_22.x | bash - && \
     apt-get install -y nodejs && \
     rm -rf /var/lib/apt/lists/*
 
-# TypeScript 5.4.5
-RUN npm install -g typescript@5.4.5
+# TypeScript 5.8.3 (latest stable)
+RUN npm install -g typescript@5.8.3 --no-optional
 
-# Python 3.12
-RUN add-apt-repository ppa:deadsnakes/ppa && \
+# Install Python
+RUN set -xe && add-apt-repository ppa:deadsnakes/ppa && \
     apt-get update && \
     apt-get install -y python3.12 python3.12-venv python3-pip && \
     ln -sf /usr/bin/python3.12 /usr/local/bin/python3 && \
@@ -75,13 +75,21 @@ RUN wget https://go.dev/dl/go1.21.5.linux-amd64.tar.gz -O /tmp/go.tar.gz && \
 
 # Rust 1.77.2
 RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y --default-toolchain 1.77.2 && \
-    . $HOME/.cargo/env && \
-    ln -sf $HOME/.cargo/bin/rustc /usr/local/bin/rustc && \
-    ln -sf $HOME/.cargo/bin/cargo /usr/local/bin/cargo
+    ln -sf /root/.cargo/bin/rustc /usr/local/bin/rustc && \
+    ln -sf /root/.cargo/bin/cargo /usr/local/bin/cargo
 
 # Java OpenJDK 17
 RUN apt-get update && \
     apt-get install -y openjdk-17-jdk && \
+    rm -rf /var/lib/apt/lists/*
+
+# C++ (GCC 12.4.0 - latest stable)
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends \
+      gcc-12 \
+      g++-12 \
+      libstdc++-12-dev && \
+    update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-12 120 --slave /usr/bin/g++ g++ /usr/bin/g++-12 && \
     rm -rf /var/lib/apt/lists/*
 
 # Install isolate (sandboxing tool)
