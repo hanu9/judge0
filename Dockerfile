@@ -1,4 +1,4 @@
-FROM judge0/compilers:1.4.0 AS production
+FROM judge0-compilers:latest AS production
 
 ENV JUDGE0_HOMEPAGE "https://judge0.com"
 LABEL homepage=$JUDGE0_HOMEPAGE
@@ -45,7 +45,6 @@ USER judge0
 
 ENV JUDGE0_VERSION "1.13.1"
 LABEL version=$JUDGE0_VERSION
-
 
 FROM production AS development
 

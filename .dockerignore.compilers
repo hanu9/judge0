@@ -1,0 +1,3 @@
+# Exclude everything except essential files for compilers image
+*
+!.dockerignore.compilers 

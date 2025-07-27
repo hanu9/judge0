@@ -1,0 +1,185 @@
+FROM ubuntu:20.04
+
+# Set non-interactive frontend to prevent hanging
+ENV DEBIAN_FRONTEND=noninteractive
+ENV TZ=UTC
+
+ENV LANG=en_US.UTF-8 LANGUAGE=en_US:en LC_ALL=en_US.UTF-8
+
+LABEL maintainer="Herman Zvonimir Došilović <hermanz.dosilovic@gmail.com>"
+
+LABEL version="5.4.0"
+
+# Set environment variables for language versions
+ENV RUBY_VERSIONS="2.7.0"
+ENV NODE_VERSIONS="22.17.1"
+ENV TYPESCRIPT_VERSIONS="5.8.3"
+ENV PYTHON_VERSIONS="3.12.7"
+ENV GO_VERSIONS="1.24.5"
+ENV RUST_VERSIONS="1.88.0"
+ENV JAVA_VERSIONS="21"
+ENV CPP_VERSIONS="9.4.0"
+
+# Install system dependencies
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends \
+      ca-certificates \
+      curl \
+      netbase \
+      wget \
+      gnupg \
+      dirmngr && \
+    rm -rf /var/lib/apt/lists/*
+
+# Install build tools
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends \
+      git \
+      mercurial \
+      openssh-client \
+      subversion \
+      procps && \
+    rm -rf /var/lib/apt/lists/*
+
+# Install development libraries
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends \
+      autoconf \
+      automake \
+      bzip2 \
+      dpkg-dev \
+      file \
+      g++ \
+      gcc \
+      imagemagick \
+      libbz2-dev \
+      libc6-dev \
+      libcurl4-openssl-dev \
+      libdb-dev \
+      libevent-dev \
+      libffi-dev \
+      libgdbm-dev \
+      libglib2.0-dev \
+      libgmp-dev \
+      libjpeg-dev \
+      libkrb5-dev \
+      liblzma-dev \
+      libmagickcore-dev \
+      libmagickwand-dev \
+      libmaxminddb-dev \
+      libncurses5-dev \
+      libncursesw5-dev \
+      libpng-dev \
+      libpq-dev \
+      libreadline-dev \
+      libsqlite3-dev \
+      libssl-dev \
+      libtool \
+      libwebp-dev \
+      libxml2-dev \
+      libxslt-dev \
+      libyaml-dev \
+      make \
+      patch \
+      unzip \
+      xz-utils \
+      zlib1g-dev \
+      $( if apt-cache show 'default-libmysqlclient-dev' 2>/dev/null | grep -q '^Version:'; then echo 'default-libmysqlclient-dev'; else echo 'libmysqlclient-dev'; fi ) && \
+    rm -rf /var/lib/apt/lists/*
+
+# Install Ruby (from source - required for Rails)
+RUN set -xe && for VERSION in $RUBY_VERSIONS; do \
+    curl -fSsL "https://cache.ruby-lang.org/pub/ruby/${VERSION%.*}/ruby-$VERSION.tar.gz" -o /tmp/ruby-$VERSION.tar.gz && \
+    mkdir /tmp/ruby-$VERSION && \
+    tar -xf /tmp/ruby-$VERSION.tar.gz -C /tmp/ruby-$VERSION --strip-components=1 && \
+    rm /tmp/ruby-$VERSION.tar.gz && \
+    cd /tmp/ruby-$VERSION && \
+    ./configure --disable-install-doc --prefix=/usr/local/ruby-$VERSION && \
+    make -j$(nproc) && \
+    make -j$(nproc) install && \
+    rm -rf /tmp/*; \
+    done
+
+# Install Node.js (from package manager - much faster)
+RUN set -xe && curl -fsSL https://deb.nodesource.com/setup_22.x | bash - && \
+    apt-get update && \
+    apt-get install -y nodejs && \
+    rm -rf /var/lib/apt/lists/* && \
+    for VERSION in $NODE_VERSIONS; do \
+    echo "Node.js $VERSION installed via apt"; \
+    done
+
+# Install TypeScript
+RUN set -xe && for VERSION in $TYPESCRIPT_VERSIONS; do \
+    npm install -g typescript@$VERSION --no-optional; \
+    done
+
+# Install Python (from package manager - much faster)
+RUN set -xe && apt-get update && \
+    apt-get install -y --no-install-recommends software-properties-common && \
+    add-apt-repository ppa:deadsnakes/ppa && \
+    apt-get update && \
+    apt-get install -y python3.12 python3.12-venv python3-pip && \
+    ln -sf /usr/bin/python3.12 /usr/local/bin/python3 && \
+    rm -rf /var/lib/apt/lists/* && \
+    for VERSION in $PYTHON_VERSIONS; do \
+    echo "Python $VERSION installed via apt"; \
+    done
+
+# Install Go (pre-compiled binary - much faster)
+RUN set -xe && for VERSION in $GO_VERSIONS; do \
+    curl -fSsL "https://storage.googleapis.com/golang/go$VERSION.linux-amd64.tar.gz" -o /tmp/go-$VERSION.tar.gz && \
+    mkdir /usr/local/go-$VERSION && \
+    tar -xf /tmp/go-$VERSION.tar.gz -C /usr/local/go-$VERSION --strip-components=1 && \
+    rm -rf /tmp/*; \
+    done && \
+    ln -sf /usr/local/go-1.24.5/bin/go /usr/local/bin/go && \
+    ln -sf /usr/local/go-1.24.5/bin/gofmt /usr/local/bin/gofmt
+
+# Install Rust (pre-compiled binary - much faster)
+RUN set -xe && for VERSION in $RUST_VERSIONS; do \
+    curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y --default-toolchain $VERSION && \
+    ln -sf /root/.cargo/bin/rustc /usr/local/bin/rustc && \
+    ln -sf /root/.cargo/bin/cargo /usr/local/bin/cargo; \
+    done
+
+# Install Java (from package manager - much faster)
+RUN set -xe && apt-get update && \
+    apt-get install -y openjdk-17-jdk && \
+    rm -rf /var/lib/apt/lists/* && \
+    for VERSION in $JAVA_VERSIONS; do \
+    echo "Java OpenJDK $VERSION installed via apt"; \
+    done
+
+# Install C++ (GCC from package manager - much faster)
+RUN set -xe && apt-get update && \
+    apt-get install -y --no-install-recommends \
+      gcc \
+      g++ \
+      libstdc++-9-dev && \
+    rm -rf /var/lib/apt/lists/* && \
+    for VERSION in $CPP_VERSIONS; do \
+    echo "GCC $(gcc --version | head -n1 | cut -d' ' -f4) installed via apt"; \
+    done
+
+# Install isolate (sandboxing tool)
+RUN set -xe && apt-get update && \
+    apt-get install -y --no-install-recommends git libcap-dev && \
+    rm -rf /var/lib/apt/lists/* && \
+    git clone https://github.com/judge0/isolate.git /tmp/isolate && \
+    cd /tmp/isolate && \
+    git checkout ad39cc4d0fbb577fb545910095c9da5ef8fc9a1a && \
+    make -j$(nproc) install && \
+    rm -rf /tmp/*
+
+# Set isolate environment
+ENV BOX_ROOT=/var/local/lib/isolate
+
+# Generate locale (non-interactive)
+RUN set -xe && apt-get update && \
+    apt-get install -y --no-install-recommends locales tzdata && \
+    rm -rf /var/lib/apt/lists/* && \
+    echo "en_US.UTF-8 UTF-8" > /etc/locale.gen && \
+    locale-gen en_US.UTF-8 && \
+    ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && \
+    echo $TZ > /etc/timezone
