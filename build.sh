@@ -8,13 +8,13 @@ echo "🚀 Building Judge0 Custom Compilers Image..."
 
 # Build compilers image first (from empty context - no local files)
 echo "📦 Building compilers image..."
-docker build -t judge0-compilers:latest - < Dockerfile.compilers
+sudo docker buildx build --platform linux/amd64 -t judge0-compilers:latest - < Dockerfile.compilers
 
 echo "✅ Compilers image built successfully!"
 
 # Build main Judge0 image
 echo "🏗️ Building main Judge0 image..."
-docker build --target production -t judge0:latest .
+sudo docker buildx build --platform linux/amd64 --target production -t judge0:latest .
 
 echo "✅ Main Judge0 image built successfully!"
 

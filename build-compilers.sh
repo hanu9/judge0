@@ -7,9 +7,9 @@ set -e
 
 echo "🚀 Building Judge0 Compilers Image..."
 
-# Build compilers image from empty context
+# Build compilers image from empty context (multi-arch)
 echo "📦 Building compilers image..."
-docker build -t judge0-compilers:latest - < Dockerfile.compilers
+sudo docker buildx build --platform linux/amd64 -t judge0-compilers:latest - < Dockerfile.compilers
 
 echo "✅ Compilers image built successfully!"
 echo ""
