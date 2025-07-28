@@ -73,23 +73,26 @@ RUN wget https://go.dev/dl/go1.21.5.linux-amd64.tar.gz -O /tmp/go.tar.gz && \
     ln -sf /usr/local/go/bin/go /usr/local/bin/go && \
     ln -sf /usr/local/go/bin/gofmt /usr/local/bin/gofmt
 
-# Rust 1.77.2
+# Rust 1.77.2 - Install in /usr/local for all users
 RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y --default-toolchain 1.77.2 && \
-    ln -sf /root/.cargo/bin/rustc /usr/local/bin/rustc && \
-    ln -sf /root/.cargo/bin/cargo /usr/local/bin/cargo
+    /root/.cargo/bin/rustup default stable && \
+    mkdir -p /usr/local/rust && \
+    cp -r /root/.rustup/toolchains/stable-* /usr/local/rust/ && \
+    ln -sf /usr/local/rust/stable-*/bin/rustc /usr/local/bin/rustc && \
+    ln -sf /usr/local/rust/stable-*/bin/cargo /usr/local/bin/cargo && \
+    chmod +x /usr/local/bin/rustc /usr/local/bin/cargo
 
 # Java OpenJDK 17
 RUN apt-get update && \
     apt-get install -y openjdk-17-jdk && \
     rm -rf /var/lib/apt/lists/*
 
-# C++ (GCC 12.4.0 - latest stable)
+# C++ (GCC 9.4.0 - available in Ubuntu 20.04)
 RUN apt-get update && \
     apt-get install -y --no-install-recommends \
-      gcc-12 \
-      g++-12 \
-      libstdc++-12-dev && \
-    update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-12 120 --slave /usr/bin/g++ g++ /usr/bin/g++-12 && \
+      gcc \
+      g++ \
+      libstdc++-9-dev && \
     rm -rf /var/lib/apt/lists/*
 
 # Install isolate (sandboxing tool)

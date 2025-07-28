@@ -392,7 +392,7 @@
     name: "Rust (latest stable)",
     is_archived: false,
     source_file: "main.rs",
-    compile_cmd: "/usr/local/bin/rustc %s main.rs",
+    compile_cmd: "LD_LIBRARY_PATH=/usr/local/rust/stable-*/lib /usr/local/bin/rustc %s main.rs",
     run_cmd: "./main"
   },
   {
