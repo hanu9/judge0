@@ -377,7 +377,7 @@
     name: "Python (latest stable)",
     is_archived: false,
     source_file: "script.py",
-    run_cmd: "/usr/local/python-3.13.5/bin/python3 script.py"
+    run_cmd: "/usr/local/python-3.12.7/bin/python3 script.py"
   },
   {
     id: 1004,
@@ -400,8 +400,8 @@
     name: "C++ (latest stable)",
     is_archived: false,
     source_file: "main.cpp",
-    compile_cmd: "/usr/local/gcc-14.3.0/bin/g++ %s main.cpp",
-    run_cmd: "LD_LIBRARY_PATH=/usr/local/gcc-14.3.0/lib64 ./a.out"
+    compile_cmd: "/usr/local/gcc-9.4.0/bin/g++ %s main.cpp",
+    run_cmd: "LD_LIBRARY_PATH=/usr/local/gcc-9.4.0/lib64 ./a.out"
   },
   {
     id: 1007,

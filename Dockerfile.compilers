@@ -100,66 +100,78 @@ RUN set -xe && for VERSION in $RUBY_VERSIONS; do \
     rm -rf /tmp/*; \
     done
 
-# Install Node.js (from package manager - much faster)
-RUN set -xe && curl -fsSL https://deb.nodesource.com/setup_22.x | bash - && \
-    apt-get update && \
-    apt-get install -y nodejs && \
-    rm -rf /var/lib/apt/lists/* && \
-    for VERSION in $NODE_VERSIONS; do \
-    echo "Node.js $VERSION installed via apt"; \
+# Install Node.js (pre-compiled binary - for multiple versions)
+RUN set -xe && for VERSION in $NODE_VERSIONS; do \
+    curl -fSsL "https://nodejs.org/dist/v$VERSION/node-v$VERSION-linux-x64.tar.gz" -o /tmp/node-$VERSION.tar.gz && \
+    mkdir /usr/local/node-$VERSION && \
+    tar -xf /tmp/node-$VERSION.tar.gz -C /usr/local/node-$VERSION --strip-components=1 && \
+    rm -rf /tmp/*; \
     done
 
-# Install TypeScript
+# Install TypeScript (using the first Node.js version)
 RUN set -xe && for VERSION in $TYPESCRIPT_VERSIONS; do \
-    npm install -g typescript@$VERSION --no-optional; \
+    PATH="/usr/local/node-$(echo $NODE_VERSIONS | cut -d' ' -f1)/bin:$PATH" /usr/local/node-$(echo $NODE_VERSIONS | cut -d' ' -f1)/bin/npm install -g typescript@$VERSION --no-optional; \
+    done && \
+    ln -sf /usr/local/node-$(echo $NODE_VERSIONS | cut -d' ' -f1)/bin/tsc /usr/bin/tsc
+
+# Install Python (from source - for multiple versions)
+RUN set -xe && for VERSION in $PYTHON_VERSIONS; do \
+    curl -fSsL "https://www.python.org/ftp/python/$VERSION/Python-$VERSION.tar.xz" -o /tmp/python-$VERSION.tar.xz && \
+    mkdir /tmp/python-$VERSION && \
+    tar -xf /tmp/python-$VERSION.tar.xz -C /tmp/python-$VERSION --strip-components=1 && \
+    rm /tmp/python-$VERSION.tar.xz && \
+    cd /tmp/python-$VERSION && \
+    ./configure --prefix=/usr/local/python-$VERSION && \
+    make -j$(nproc) && \
+    make -j$(nproc) install && \
+    rm -rf /tmp/*; \
     done
 
-# Install Python (from package manager - much faster)
-RUN set -xe && apt-get update && \
-    apt-get install -y --no-install-recommends software-properties-common && \
-    add-apt-repository ppa:deadsnakes/ppa && \
-    apt-get update && \
-    apt-get install -y python3.12 python3.12-venv python3-pip && \
-    ln -sf /usr/bin/python3.12 /usr/local/bin/python3 && \
-    rm -rf /var/lib/apt/lists/* && \
-    for VERSION in $PYTHON_VERSIONS; do \
-    echo "Python $VERSION installed via apt"; \
-    done
-
-# Install Go (pre-compiled binary - much faster)
+# Install Go (pre-compiled binary - for multiple versions)
 RUN set -xe && for VERSION in $GO_VERSIONS; do \
     curl -fSsL "https://storage.googleapis.com/golang/go$VERSION.linux-amd64.tar.gz" -o /tmp/go-$VERSION.tar.gz && \
     mkdir /usr/local/go-$VERSION && \
     tar -xf /tmp/go-$VERSION.tar.gz -C /usr/local/go-$VERSION --strip-components=1 && \
     rm -rf /tmp/*; \
     done && \
-    ln -sf /usr/local/go-1.24.5/bin/go /usr/local/bin/go && \
-    ln -sf /usr/local/go-1.24.5/bin/gofmt /usr/local/bin/gofmt
+    ln -sf /usr/local/go-$(echo $GO_VERSIONS | cut -d' ' -f1)/bin/go /usr/local/bin/go && \
+    ln -sf /usr/local/go-$(echo $GO_VERSIONS | cut -d' ' -f1)/bin/gofmt /usr/local/bin/gofmt
 
-# Install Rust (pre-compiled binary - much faster)
+# Install Rust (from source - for multiple versions)
 RUN set -xe && for VERSION in $RUST_VERSIONS; do \
-    curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y --default-toolchain $VERSION && \
-    ln -sf /root/.cargo/bin/rustc /usr/local/bin/rustc && \
-    ln -sf /root/.cargo/bin/cargo /usr/local/bin/cargo; \
+    curl -fSsL "https://static.rust-lang.org/dist/rust-$VERSION-x86_64-unknown-linux-gnu.tar.gz" -o /tmp/rust-$VERSION.tar.gz && \
+    mkdir /tmp/rust-$VERSION && \
+    tar -xf /tmp/rust-$VERSION.tar.gz -C /tmp/rust-$VERSION --strip-components=1 && \
+    rm /tmp/rust-$VERSION.tar.gz && \
+    cd /tmp/rust-$VERSION && \
+    ./install.sh --prefix=/usr/local/rust-$VERSION --disable-ldconfig && \
+    rm -rf /tmp/*; \
     done
 
-# Install Java (from package manager - much faster)
-RUN set -xe && apt-get update && \
-    apt-get install -y openjdk-17-jdk && \
-    rm -rf /var/lib/apt/lists/* && \
-    for VERSION in $JAVA_VERSIONS; do \
-    echo "Java OpenJDK $VERSION installed via apt"; \
+# Install Java (from source - for multiple versions)
+RUN set -xe && for VERSION in $JAVA_VERSIONS; do \
+    curl -fSsL "https://download.java.net/java/GA/jdk21/fd2272bbf8e04c3dbaee13770090416c/35/GPL/openjdk-21_linux-x64_bin.tar.gz" -o /tmp/openjdk$VERSION.tar.gz && \
+    mkdir /usr/local/openjdk$VERSION && \
+    tar -xf /tmp/openjdk$VERSION.tar.gz -C /usr/local/openjdk$VERSION --strip-components=1 && \
+    rm /tmp/openjdk$VERSION.tar.gz && \
+    ln -sf /usr/local/openjdk$VERSION/bin/javac /usr/local/bin/javac && \
+    ln -sf /usr/local/openjdk$VERSION/bin/java /usr/local/bin/java && \
+    ln -sf /usr/local/openjdk$VERSION/bin/jar /usr/local/bin/jar; \
     done
 
-# Install C++ (GCC from package manager - much faster)
-RUN set -xe && apt-get update && \
-    apt-get install -y --no-install-recommends \
-      gcc \
-      g++ \
-      libstdc++-9-dev && \
-    rm -rf /var/lib/apt/lists/* && \
-    for VERSION in $CPP_VERSIONS; do \
-    echo "GCC $(gcc --version | head -n1 | cut -d' ' -f4) installed via apt"; \
+# Install C++ (GCC from source - for multiple versions)
+RUN set -xe && for VERSION in $CPP_VERSIONS; do \
+    curl -fSsL "https://ftp.gnu.org/gnu/gcc/gcc-$VERSION/gcc-$VERSION.tar.gz" -o /tmp/gcc-$VERSION.tar.gz && \
+    mkdir /tmp/gcc-$VERSION && \
+    tar -xf /tmp/gcc-$VERSION.tar.gz -C /tmp/gcc-$VERSION --strip-components=1 && \
+    rm /tmp/gcc-$VERSION.tar.gz && \
+    cd /tmp/gcc-$VERSION && \
+    ./contrib/download_prerequisites && \
+    mkdir build && cd build && \
+    ../configure --prefix=/usr/local/gcc-$VERSION --enable-languages=c,c++ --disable-multilib && \
+    make -j$(nproc) && \
+    make -j$(nproc) install && \
+    rm -rf /tmp/*; \
     done
 
 # Install isolate (sandboxing tool)
