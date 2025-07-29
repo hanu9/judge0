@@ -384,7 +384,7 @@
     name: "Go (latest stable)",
     is_archived: false,
     source_file: "main.go",
-    compile_cmd: "GOCACHE=/tmp/.cache/go-build GOTMPDIR=/tmp/go-build /usr/local/bin/go build -ldflags=-s -ldflags=-w %s main.go",
+    compile_cmd: "mkdir -p /tmp/.cache/go-build /tmp/go-build && GOCACHE=/tmp/.cache/go-build GOTMPDIR=/tmp/go-build /usr/local/bin/go build -ldflags=-s -ldflags=-w %s main.go",
     run_cmd: "./main"
   },
   {
