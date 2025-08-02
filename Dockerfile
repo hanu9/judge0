@@ -1,4 +1,4 @@
-FROM compilers:latest AS production
+FROM judge0/compilers:1.4.0 AS production
 
 ENV JUDGE0_HOMEPAGE "https://judge0.com"
 LABEL homepage=$JUDGE0_HOMEPAGE
@@ -68,7 +68,6 @@ RUN set -xe && \
     ln -s /usr/local/openjdk13/bin/java /usr/local/bin/java && \
     ln -s /usr/local/openjdk13/bin/jar /usr/local/bin/jar
 
-
 EXPOSE 2358
 
 WORKDIR /api
@@ -90,7 +89,7 @@ RUN useradd -u 1000 -m -r judge0 && \
 
 USER judge0
 
-ENV JUDGE0_VERSION=1.13.1
+ENV JUDGE0_VERSION "1.13.1"
 LABEL version=$JUDGE0_VERSION
 
 
