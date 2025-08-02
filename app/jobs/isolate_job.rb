@@ -64,6 +64,9 @@ class IsolateJob < ApplicationJob
     @metadata_file = workdir + "/" + METADATA_FILE_NAME
     @additional_files_archive_file = boxdir + "/" + ADDITIONAL_FILES_ARCHIVE_FILE_NAME
 
+    # Fix permissions for the newly created isolate box
+    fix_isolate_permissions
+
     [stdin_file, stdout_file, stderr_file, metadata_file].each do |f|
       initialize_file(f)
     end
@@ -78,10 +81,25 @@ class IsolateJob < ApplicationJob
     `sudo touch #{file} && sudo chown $(whoami): #{file}`
   end
 
+  def fix_isolate_permissions
+    # Fix ownership of the entire isolate workdir for the current user
+    `sudo chown -R $(whoami): #{workdir}`
+    # Ensure proper permissions on the box directory
+    `sudo chmod -R 755 #{boxdir}` if Dir.exist?(boxdir)
+    `sudo chmod -R 755 #{tmpdir}` if Dir.exist?(tmpdir)
+  end
+
   def extract_archive
     return unless submission.additional_files?
 
-    File.open(additional_files_archive_file, "wb") { |f| f.write(submission.additional_files) }
+    # Ensure we have write permissions to the additional files archive location
+    begin
+      File.open(additional_files_archive_file, "wb") { |f| f.write(submission.additional_files) }
+    rescue Errno::EACCES => e
+      # If we get a permission error, try to fix permissions and retry
+      fix_isolate_permissions
+      File.open(additional_files_archive_file, "wb") { |f| f.write(submission.additional_files) }
+    end
 
     command = "isolate #{cgroups} \
     -s \
@@ -308,6 +326,9 @@ class IsolateJob < ApplicationJob
 
   def fix_permissions
     `sudo chown -R $(whoami): #{boxdir}`
+    `sudo chown -R $(whoami): #{tmpdir}` if Dir.exist?(tmpdir)
+    `sudo chmod -R 755 #{boxdir}` if Dir.exist?(boxdir)
+    `sudo chmod -R 755 #{tmpdir}` if Dir.exist?(tmpdir)
   end
 
   def call_callback

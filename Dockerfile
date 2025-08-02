@@ -105,13 +105,16 @@ RUN apt-get update && \
     rm -rf /tmp/* && \
     rm -rf /var/lib/apt/lists/*
 
+# Set isolate environment variables
+ENV BOX_ROOT=/var/local/lib/isolate
+
 # Create judge0 user first to set up isolate properly
 RUN useradd -u 1000 -m -r judge0 && \
     echo "judge0 ALL=(ALL) NOPASSWD: ALL" > /etc/sudoers && \
     mkdir -p /var/local/lib/isolate && \
     chown -R judge0:judge0 /var/local/lib/isolate && \
     chmod -R 755 /var/local/lib/isolate && \
-    su judge0 -c "isolate --init"
+    su judge0 -c "BOX_ROOT=/var/local/lib/isolate isolate --init"
 
 # Install bundler and aglio
 RUN echo "gem: --no-document" > /root/.gemrc && \
@@ -133,9 +136,6 @@ COPY . .
 RUN chown judge0: /api/tmp/
 
 USER judge0
-
-# Set isolate environment variables
-ENV BOX_ROOT=/var/local/lib/isolate
 
 ENV JUDGE0_VERSION="1.13.1"
 LABEL version=$JUDGE0_VERSION
