@@ -95,16 +95,17 @@ RUN apt-get update && \
       libstdc++-9-dev && \
     rm -rf /var/lib/apt/lists/*
 
-# Install isolate (sandboxing tool)
-RUN apt-get update && \
+RUN set -xe && \
+    apt-get update && \
     apt-get install -y --no-install-recommends git libcap-dev && \
+    rm -rf /var/lib/apt/lists/* && \
     git clone https://github.com/judge0/isolate.git /tmp/isolate && \
     cd /tmp/isolate && \
     git checkout ad39cc4d0fbb577fb545910095c9da5ef8fc9a1a && \
     make -j$(nproc) install && \
-    rm -rf /tmp/* && \
-    rm -rf /var/lib/apt/lists/* && \
-    isolate --init
+    rm -rf /tmp/*
+    
+ENV BOX_ROOT=/var/local/lib/isolate
 
 # Install bundler and aglio
 RUN echo "gem: --no-document" > /root/.gemrc && \
