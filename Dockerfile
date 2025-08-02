@@ -1,4 +1,26 @@
-FROM compilers:latest AS production
+FROM judge0/compilers:latest-slim AS production
+
+ENV JUDGE0_HOMEPAGE "https://judge0.com"
+LABEL homepage=$JUDGE0_HOMEPAGE
+
+ENV JUDGE0_SOURCE_CODE "https://github.com/judge0/judge0"
+LABEL source_code=$JUDGE0_SOURCE_CODE
+
+ENV JUDGE0_MAINTAINER "Herman Zvonimir Došilović <hermanz.dosilovic@gmail.com>"
+LABEL maintainer=$JUDGE0_MAINTAINER
+
+ENV PATH "/usr/local/ruby-2.7.0/bin:/opt/.gem/bin:$PATH"
+ENV GEM_HOME "/opt/.gem/"
+
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends \
+      cron \
+      libpq-dev \
+      sudo && \
+    rm -rf /var/lib/apt/lists/* && \
+    echo "gem: --no-document" > /root/.gemrc && \
+    gem install bundler:2.1.4 && \
+    npm install -g --unsafe-perm aglio@2.3.0
 
 # Node.js 22.x LTS
 RUN curl -fsSL https://deb.nodesource.com/setup_22.x | bash - && \
@@ -9,10 +31,15 @@ RUN curl -fsSL https://deb.nodesource.com/setup_22.x | bash - && \
 RUN npm install -g typescript@5.8.3 --no-optional
 
 # Install Python
-RUN set -xe && add-apt-repository ppa:deadsnakes/ppa && \
+RUN sed -i 's/deb.debian.org/archive.debian.org/g' /etc/apt/sources.list && \
+    sed -i 's/security.debian.org/archive.debian.org\/debian-security/g' /etc/apt/sources.list && \
+    sed -i '/debian-security\/debian-security/d' /etc/apt/sources.list && \
     apt-get update && \
-    apt-get install -y python3.12 python3.12-venv python3-pip && \
-    ln -sf /usr/bin/python3.12 /usr/local/bin/python3 && \
+    apt-get install -y --no-install-recommends \
+      python3 \
+      python3-pip \
+      python3-venv && \
+    ln -sf /usr/bin/python3 /usr/local/bin/python3 && \
     rm -rf /var/lib/apt/lists/*
 
 # Go 1.21.5
@@ -31,28 +58,16 @@ RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y --de
     ln -sf /usr/local/rust/stable-*/bin/cargo /usr/local/bin/cargo && \
     chmod +x /usr/local/bin/rustc /usr/local/bin/cargo
 
-# Java OpenJDK 17
-RUN apt-get update && \
-    apt-get install -y openjdk-17-jdk && \
-    rm -rf /var/lib/apt/lists/*
+# Check for latest version here: https://jdk.java.net
+RUN set -xe && \
+    curl -fSsL "https://download.java.net/java/GA/jdk13.0.1/cec27d702aa74d5a8630c65ae61e4305/9/GPL/openjdk-13.0.1_linux-x64_bin.tar.gz" -o /tmp/openjdk13.tar.gz && \
+    mkdir /usr/local/openjdk13 && \
+    tar -xf /tmp/openjdk13.tar.gz -C /usr/local/openjdk13 --strip-components=1 && \
+    rm /tmp/openjdk13.tar.gz && \
+    ln -s /usr/local/openjdk13/bin/javac /usr/local/bin/javac && \
+    ln -s /usr/local/openjdk13/bin/java /usr/local/bin/java && \
+    ln -s /usr/local/openjdk13/bin/jar /usr/local/bin/jar
 
-# C++ (GCC 9.4.0 - available in Ubuntu 20.04)
-RUN apt-get update && \
-    apt-get install -y --no-install-recommends \
-      gcc \
-      g++ \
-      libstdc++-9-dev && \
-    rm -rf /var/lib/apt/lists/*
-
-RUN apt-get update && \
-    apt-get install -y --no-install-recommends \
-      cron \
-      libpq-dev \
-      sudo && \
-    rm -rf /var/lib/apt/lists/* && \
-    echo "gem: --no-document" > /root/.gemrc && \
-    gem install bundler:2.1.4 && \
-    npm install -g --unsafe-perm aglio@2.3.0
 
 EXPOSE 2358
 
@@ -75,7 +90,7 @@ RUN useradd -u 1000 -m -r judge0 && \
 
 USER judge0
 
-ENV JUDGE0_VERSION "1.13.1"
+ENV JUDGE0_VERSION=1.13.1
 LABEL version=$JUDGE0_VERSION
 
 
