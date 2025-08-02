@@ -46,6 +46,9 @@ export POSTGRES_PORT=${POSTGRES_PORT:-5432}
 export POSTGRES_DB=${POSTGRES_DB:-postgres}
 export POSTGRES_USER=${POSTGRES_USER:-postgres}
 
+# Isolate
+export BOX_ROOT=${BOX_ROOT:-/var/local/lib/isolate}
+
 # Other
 export RUBYOPT=-W:no-deprecated
 export DISABLE_DATABASE_ENVIRONMENT_CHECK=1
