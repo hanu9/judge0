@@ -20,7 +20,8 @@ RUN sed -i 's/deb.debian.org/archive.debian.org/g' /etc/apt/sources.list && \
     apt-get install -y --no-install-recommends \
       cron \
       libpq-dev \
-      sudo && \
+      sudo \
+      unzip && \
     rm -rf /var/lib/apt/lists/* && \
     echo "gem: --no-document" > /root/.gemrc && \
     gem install bundler:2.1.4
