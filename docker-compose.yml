@@ -15,6 +15,7 @@ services:
     image: judge0:latest
     volumes:
       - ./judge0.conf:/judge0.conf:ro
+      - isolate_data:/var/local/lib/isolate
     ports:
       - "2358:2358"
     privileged: true
@@ -26,6 +27,7 @@ services:
     command: ["./scripts/workers"]
     volumes:
       - ./judge0.conf:/judge0.conf:ro
+      - isolate_data:/var/local/lib/isolate
     privileged: true
     <<: *default-logging
     restart: always
@@ -52,3 +54,4 @@ services:
 
 volumes:
   data:
+  isolate_data:

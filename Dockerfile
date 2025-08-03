@@ -1,34 +1,38 @@
-FROM judge0/compilers:1.4.0 AS production
+FROM compilers:latest AS production
 
-ENV JUDGE0_HOMEPAGE "https://judge0.com"
+ENV JUDGE0_HOMEPAGE=https://judge0.com
 LABEL homepage=$JUDGE0_HOMEPAGE
 
-ENV JUDGE0_SOURCE_CODE "https://github.com/judge0/judge0"
+ENV JUDGE0_SOURCE_CODE=https://github.com/judge0/judge0
 LABEL source_code=$JUDGE0_SOURCE_CODE
 
-ENV JUDGE0_MAINTAINER "Herman Zvonimir Došilović <hermanz.dosilovic@gmail.com>"
+ENV JUDGE0_MAINTAINER="Herman Zvonimir Došilović <hermanz.dosilovic@gmail.com>"
 LABEL maintainer=$JUDGE0_MAINTAINER
 
-ENV PATH "/usr/local/ruby-2.7.0/bin:/opt/.gem/bin:$PATH"
-ENV GEM_HOME "/opt/.gem/"
+ENV PATH=/usr/local/ruby-2.7.0/bin:/opt/.gem/bin:$PATH
+ENV GEM_HOME=/opt/.gem/
 
-RUN apt-get update && \
+# Update sources.list to use archive.debian.org for EOL releases
+RUN sed -i 's/deb.debian.org/archive.debian.org/g' /etc/apt/sources.list && \
+    sed -i 's/security.debian.org/archive.debian.org\/debian-security/g' /etc/apt/sources.list && \
+    sed -i '/debian-security\/debian-security/d' /etc/apt/sources.list && \
+    apt-get update && \
     apt-get install -y --no-install-recommends \
       cron \
       libpq-dev \
       sudo && \
     rm -rf /var/lib/apt/lists/* && \
     echo "gem: --no-document" > /root/.gemrc && \
-    gem install bundler:2.1.4 && \
-    npm install -g --unsafe-perm aglio@2.3.0
+    gem install bundler:2.1.4
 
 # Node.js 22.x LTS
 RUN curl -fsSL https://deb.nodesource.com/setup_22.x | bash - && \
     apt-get install -y nodejs && \
     rm -rf /var/lib/apt/lists/*
 
-# TypeScript 5.8.3 (latest stable)
-RUN npm install -g typescript@5.8.3 --no-optional
+# Install aglio and TypeScript
+RUN npm install -g --unsafe-perm aglio@2.3.0 && \
+    npm install -g typescript@5.8.3 --no-optional
 
 # Install Python
 RUN sed -i 's/deb.debian.org/archive.debian.org/g' /etc/apt/sources.list && \
@@ -89,7 +93,7 @@ RUN useradd -u 1000 -m -r judge0 && \
 
 USER judge0
 
-ENV JUDGE0_VERSION "1.13.1"
+ENV JUDGE0_VERSION=1.13.1
 LABEL version=$JUDGE0_VERSION
 
 
