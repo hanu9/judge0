@@ -33,6 +33,12 @@ RUN apt-get update && \
       nlohmann-json3-dev && \
     rm -rf /var/lib/apt/lists/*
 
+# Install Gson 2.x
+RUN set -xe && \
+    mkdir -p /usr/local/lib/java && \
+    curl -fSsL "https://repo1.maven.org/maven2/com/google/code/gson/gson/2.10.1/gson-2.10.1.jar" -o /usr/local/lib/java/gson-2.10.1.jar && \
+    ln -s /usr/local/lib/java/gson-2.10.1.jar /usr/local/lib/java/gson.jar
+
 EXPOSE 2358
 
 WORKDIR /api
