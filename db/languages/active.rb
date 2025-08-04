@@ -369,7 +369,7 @@
     name: "TypeScript (latest stable)",
     is_archived: false,
     source_file: "script.ts",
-    compile_cmd: "/usr/bin/tsc %s script.ts",
+    compile_cmd: "/usr/local/node-22.17.1/bin/tsc %s script.ts",
     run_cmd: "/usr/local/node-22.17.1/bin/node script.js"
   },
   {
