@@ -9,7 +9,7 @@ LABEL source_code=$JUDGE0_SOURCE_CODE
 ENV JUDGE0_MAINTAINER="Herman Zvonimir Došilović <hermanz.dosilovic@gmail.com>"
 LABEL maintainer=$JUDGE0_MAINTAINER
 
-ENV PATH=/usr/local/ruby-3.4.5/bin:/opt/.gem/bin:$PATH
+ENV PATH=/usr/local/ruby-2.7.0/bin:/opt/.gem/bin:$PATH
 ENV GEM_HOME=/opt/.gem/
 
 # Update sources.list to use archive.debian.org for EOL releases
@@ -25,7 +25,7 @@ RUN sed -i 's/deb.debian.org/archive.debian.org/g' /etc/apt/sources.list && \
       unzip && \
     rm -rf /var/lib/apt/lists/* && \
     echo "gem: --no-document" > /root/.gemrc && \
-    gem install bundler:2.4.22
+    gem install bundler:2.1.4
 
 # Install nlohmann/json
 RUN apt-get update && \
@@ -38,7 +38,7 @@ EXPOSE 2358
 WORKDIR /api
 
 COPY Gemfile* ./
-RUN RAILS_ENV=production bundle update --bundler && RAILS_ENV=production bundle
+RUN RAILS_ENV=production bundle
 
 COPY cron /etc/cron.d
 RUN cat /etc/cron.d/* | crontab -
