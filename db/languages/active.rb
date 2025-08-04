@@ -362,7 +362,7 @@
     name: "Node.js (latest stable)",
     is_archived: false,
     source_file: "script.js",
-    run_cmd: "/usr/bin/node script.js"
+    run_cmd: "/usr/local/node-22.17.1/bin/node script.js"
   },
   {
     id: 1002,
@@ -370,21 +370,21 @@
     is_archived: false,
     source_file: "script.ts",
     compile_cmd: "/usr/bin/tsc %s script.ts",
-    run_cmd: "/usr/bin/node script.js"
+    run_cmd: "/usr/local/node-22.17.1/bin/node script.js"
   },
   {
     id: 1003,
     name: "Python (latest stable)",
     is_archived: false,
     source_file: "script.py",
-    run_cmd: "/usr/local/bin/python3 script.py"
+    run_cmd: "/usr/local/python-3.13.5/bin/python3 script.py"
   },
   {
     id: 1004,
     name: "Go (latest stable)",
     is_archived: false,
     source_file: "main.go",
-    compile_cmd: "mkdir -p /tmp/.cache/go-build /tmp/go-build && GOCACHE=/tmp/.cache/go-build GOTMPDIR=/tmp/go-build /usr/local/bin/go build -ldflags=-s -ldflags=-w %s main.go",
+    compile_cmd: "GOCACHE=/tmp/.cache/go-build /usr/local/go-1.24.1/bin/go build %s main.go",
     run_cmd: "./main"
   },
   {
@@ -392,7 +392,7 @@
     name: "Rust (latest stable)",
     is_archived: false,
     source_file: "main.rs",
-    compile_cmd: "LD_LIBRARY_PATH=/usr/local/rust/stable-*/lib /usr/local/bin/rustc %s main.rs",
+    compile_cmd: "/usr/local/rust-1.88.0/bin/rustc %s main.rs",
     run_cmd: "./main"
   },
   {
@@ -400,15 +400,22 @@
     name: "C++ (latest stable)",
     is_archived: false,
     source_file: "main.cpp",
-    compile_cmd: "/usr/bin/g++ %s main.cpp",
-    run_cmd: "./a.out"
+    compile_cmd: "/usr/local/gcc-14.3.0/bin/g++ %s main.cpp",
+    run_cmd: "LD_LIBRARY_PATH=/usr/local/gcc-14.3.0/lib64 ./a.out"
   },
   {
     id: 1007,
     name: "Java (latest stable)",
     is_archived: false,
     source_file: "Main.java",
-    compile_cmd: "/usr/bin/javac %s Main.java",
-    run_cmd: "/usr/bin/java Main"
+    compile_cmd: "/usr/local/openjdk24/bin/javac %s Main.java",
+    run_cmd: "/usr/local/openjdk24/bin/java Main"
+  },
+  {
+    id: 1008,
+    name: "PHP (latest stable)",
+    is_archived: false,
+    source_file: "script.php",
+    run_cmd: "/usr/local/php-8.4.11/bin/php script.php"
   }
 ]
