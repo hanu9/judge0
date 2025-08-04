@@ -408,8 +408,8 @@
     name: "Java (latest stable)",
     is_archived: false,
     source_file: "Main.java",
-    compile_cmd: "/usr/local/openjdk24/bin/javac %s Main.java",
-    run_cmd: "/usr/local/openjdk24/bin/java Main"
+    compile_cmd: "/usr/local/openjdk24/bin/javac -cp .:/usr/local/lib/java/gson.jar %s Main.java",
+    run_cmd: "/usr/local/openjdk24/bin/java -cp .:/usr/local/lib/java/gson.jar Main"
   },
   {
     id: 1008,
